@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📞 Spam Call Detector</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .container {
+            background: rgba(30, 30, 30, 0.95);
+            color: #e0e0e0;
+        }
+
+        body.dark-mode h1 .gradient-text {
+            background: linear-gradient(135deg, #8b9dc3, #a8b5d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.dark-mode h2 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .subtitle {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode input[type="text"] {
+            background: #2a2a2a;
+            border-color: #404040;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode input[type="text"]:focus {
+            border-color: #8b9dc3;
+            box-shadow: 0 0 0 3px rgba(139, 157, 195, 0.1);
+        }
+
+        body.dark-mode input[type="text"]::placeholder {
+            color: #999;
+        }
+
+        body.dark-mode button {
+            background: linear-gradient(135deg, #8b9dc3, #a8b5d1);
+        }
+
+        body.dark-mode .input-icon {
+            color: #707070;
+        }
+
+        body.dark-mode .result {
+            background-color: #1a1a1a;
+            border-color: #333;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .result p {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .result strong {
+            color: #ffffff;
+        }
+
+        body.dark-mode ul li {
+            color: #e0e0e0;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 .gradient-text {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .form-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1.2rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .result {
+            margin-top: 2rem;
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards;
+        }
+        .result p {
+            margin: 0.5rem 0;
+        }
+        ul {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+        ul li {
+            margin-bottom: 0.5rem;
+        }
+        .safe {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .suspicious {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .spam {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📞 <span class="gradient-text">Spam Call Detector</span></h1>
+            <p class="subtitle">Protect yourself from unwanted calls</p>
+        </div>
+
+        <div class="form-container">
+            <form method="POST" action="/check_call">
+                <div class="input-group">
+                    <input type="text" name="phone_number" placeholder="Enter phone number (e.g., +1-555-123-4567)" required>
+                    <span class="input-icon">📱</span>
+                </div>
+                <button type="submit">
+                    🔍 Analyze Number
+                </button>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="result">
+            <h2>Analysis Result</h2>
+            <p><strong>Phone Number:</strong> {{ result.phone_number }}</p>
+            <p><strong>Country:</strong> {{ result.country }}</p>
+
+            {% set verdict = result.prediction.lower() %}
+            {% if "spam" in verdict or "robocall" in verdict or "sales" in verdict %}
+                <p><strong>Prediction:</strong> <span class="spam">{{ result.prediction }}</span></p>
+            {% elif "suspicious" in verdict %}
+                <p><strong>Prediction:</strong> <span class="suspicious">{{ result.prediction }}</span></p>
+            {% else %}
+                <p><strong>Prediction:</strong> <span class="safe">{{ result.prediction }}</span></p>
+            {% endif %}
+
+            {% if result.reasons %}
+            <ul>
+                {% for reason in result.reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                themeToggle.textContent = '☀';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.textContent = '☀';
+            }
+        });
+
+        // Add form submission loading state (UI enhancement only)
+        document.querySelector('form').addEventListener('submit', function() {
+            const button = document.querySelector('button[type="submit"]');
+            
+            button.innerHTML = '⏳ Analyzing...';
+            button.disabled = true;
+        });
+
+        // Add input validation feedback (UI enhancement only)
+        const phoneInput = document.querySelector('input[name="phone_number"]');
+        phoneInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            const isValid = value.length > 0;
+            
+            if (isValid) {
+                e.target.style.borderColor = '#10b981';
+            } else {
+                e.target.style.borderColor = '#e5e7eb';
+            }
+        });
+    </script>
+</body>
+</html>
